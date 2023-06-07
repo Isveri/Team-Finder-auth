@@ -23,7 +23,7 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
         try{
-            userService.saveUser(user);
+            userService.saveUser(new User(user.getUserName(), user.getPassword()));
             return new ResponseEntity<>(user, HttpStatus.CREATED);
         } catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
