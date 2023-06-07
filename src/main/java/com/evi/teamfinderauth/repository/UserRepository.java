@@ -1,11 +1,13 @@
 package com.evi.teamfinderauth.repository;
 
-import com.evi.teamfinderauth.model.User;
+import com.evi.teamfinderauth.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User,String> {
 
-    User findByUserNameAndPassword(String userName, String password);
+    Optional<User> findByUsername(String username);
 }
