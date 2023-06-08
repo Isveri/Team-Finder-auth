@@ -28,7 +28,7 @@ public class JwtTokenUtil {
         return Jwts.builder()
                 .setSubject(subject)
                 .setClaims(claims)
-                .claim("role","USER") //TODO zmienic role na taka jaka byla
+                .claim("role",user.roleToString())
                 .setIssuer(jwtIssuer)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000)) // 1 week

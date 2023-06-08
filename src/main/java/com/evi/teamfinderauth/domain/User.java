@@ -41,12 +41,14 @@ public class User implements UserDetails, CredentialsContainer {
         Role role = this.getRole();
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority(role.getName()));
-        authorities.add(new SimpleGrantedAuthority("USER")); //TODO zmienic to ostatecznie
         return authorities;
     }
     @Builder.Default
     private boolean deleted = false;
 
+    public String roleToString(){
+        return this.role.getName();
+    }
 
 
     @Override
