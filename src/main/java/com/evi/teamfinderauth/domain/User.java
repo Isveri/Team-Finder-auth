@@ -7,6 +7,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,6 +31,9 @@ public class User implements UserDetails, CredentialsContainer {
 
     @NotBlank
     private String password;
+
+    @Email
+    private String email;
 
     @ManyToOne(cascade=CascadeType.MERGE)
     @JoinColumn(name="role_id")
