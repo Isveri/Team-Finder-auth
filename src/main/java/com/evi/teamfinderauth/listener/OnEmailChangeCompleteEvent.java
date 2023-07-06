@@ -1,4 +1,4 @@
-package com.evi.teamfinderauth.listeners;
+package com.evi.teamfinderauth.listener;
 
 import com.evi.teamfinderauth.domain.User;
 import lombok.Getter;
@@ -9,15 +9,17 @@ import java.util.Locale;
 
 @Getter
 @Setter
-public class OnAccountDeleteCompleteEvent  extends ApplicationEvent {
+public class OnEmailChangeCompleteEvent extends ApplicationEvent {
 
     private String appUrl;
     private Locale locale;
     private User user;
+    private String email;
 
-    public OnAccountDeleteCompleteEvent(User user,Locale locale , String appUrl){
+    public OnEmailChangeCompleteEvent(User user,Locale locale,String email , String appUrl){
         super(user);
         this.user = user;
+        this.email = email;
         this.locale = locale;
         this.appUrl = appUrl;
     }

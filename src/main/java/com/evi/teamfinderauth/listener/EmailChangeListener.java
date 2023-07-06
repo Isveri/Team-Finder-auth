@@ -1,5 +1,4 @@
-package com.evi.teamfinderauth.listeners;
-
+package com.evi.teamfinderauth.listener;
 
 import com.evi.teamfinderauth.domain.User;
 import com.evi.teamfinderauth.service.AuthService;
@@ -15,25 +14,24 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 @Component
-public class AccountRegisterListener implements ApplicationListener<OnAccountRegisterCompleteEvent> {
+public class EmailChangeListener implements ApplicationListener<OnEmailChangeCompleteEvent> {
     private final AuthService authService;
-
     private final JavaMailSender javaMailSender;
-
     @Override
-    public void onApplicationEvent(OnAccountRegisterCompleteEvent event) {
-        this.confirmAccountRegister(event);
+    public void onApplicationEvent(OnEmailChangeCompleteEvent event) {
+        this.confirmEmailChange(event);
     }
 
-    private void confirmAccountRegister(OnAccountRegisterCompleteEvent event) {
+    private void confirmEmailChange(OnEmailChangeCompleteEvent event){
         User user = event.getUser();
         String token = UUID.randomUUID().toString();
-        authService.createVerificationToken(user, token);
+        String newEmail = event.getEmail();
+        authService.createEmailChangeToken(user, token,newEmail);
 
         String recipientAddress = user.getEmail();
-        String subject = "Account Register Confirmation";
+        String subject = "Email Change Confirmation";
         String confirmationUrl
-                = event.getAppUrl() + "/confirmRegister?token=" + token;
+                = event.getAppUrl() + "/emailChangeConfirm?token=" + token;
 
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper email = new MimeMessageHelper(mimeMessage, "utf-8");
@@ -46,12 +44,12 @@ public class AccountRegisterListener implements ApplicationListener<OnAccountReg
                     "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/>\n" +
                     "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n" +
                     "    <title>Account Register Confirm</title></head>\n" +
-                    "  <body><div style='justify-content:center;'><div><h2 style='justify-content:center;background-color: #0d1f30fa; color: #eee;padding: 15px 25px;'>Welcome to Team Finder</h2>" +
-                    "<h3>You successfully registered your new account. To enable it click button below</h3>" +
+                    "  <body><div style='justify-content:center;'><div><h2 style='justify-content:center;background-color: #0d1f30fa; color: #eee;padding: 15px 25px;'>Change Email Request</h2>" +
+                    "<h3>To finish request please click button below. You will be logged in to account</h3>" +
                     "<a class='btn btn-primary w-100 w-lg-50 align-center' href='http://localhost:4200" + confirmationUrl + "'><button style='background-color: #0d1f30fa;\n" +
                     "  color: #eee;\n" +
                     "  padding: 15px 25px;\n" +
-                    "  border: none;'>Enable account</button></a></div></div></body>" +
+                    "  border: none;'>Change email</button></a></div></div></body>" +
                     "</html>", true);
             authService.sendMessage(mimeMessage);
         } catch (MessagingException e) {

@@ -1,4 +1,4 @@
-package com.evi.teamfinderauth.listeners;
+package com.evi.teamfinderauth.listener;
 
 import com.evi.teamfinderauth.domain.User;
 import lombok.Getter;

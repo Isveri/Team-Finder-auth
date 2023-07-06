@@ -2,8 +2,8 @@ package com.evi.teamfinderauth.controller;
 
 import com.evi.teamfinderauth.domain.User;
 import com.evi.teamfinderauth.exception.UserNotFoundException;
-import com.evi.teamfinderauth.listeners.OnAccountDeleteCompleteEvent;
-import com.evi.teamfinderauth.listeners.OnEmailChangeCompleteEvent;
+import com.evi.teamfinderauth.listener.OnAccountDeleteCompleteEvent;
+import com.evi.teamfinderauth.listener.OnEmailChangeCompleteEvent;
 import com.evi.teamfinderauth.model.ChangePasswordDTO;
 import com.evi.teamfinderauth.model.EmailDTO;
 import com.evi.teamfinderauth.security.model.TokenResponse;

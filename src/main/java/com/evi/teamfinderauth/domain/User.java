@@ -39,6 +39,9 @@ public class User implements UserDetails, CredentialsContainer {
     @JoinColumn(name="role_id")
     private Role role;
 
+    @OneToMany(mappedBy = "user",cascade = CascadeType.MERGE)
+    private List<Platform> platforms;
+
     @Transient
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

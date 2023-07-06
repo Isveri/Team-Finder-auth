@@ -2,7 +2,7 @@ package com.evi.teamfinderauth.service;
 
 import com.evi.teamfinderauth.domain.Role;
 import com.evi.teamfinderauth.exception.*;
-import com.evi.teamfinderauth.listeners.OnAccountRegisterCompleteEvent;
+import com.evi.teamfinderauth.listener.OnAccountRegisterCompleteEvent;
 import com.evi.teamfinderauth.model.ChangePasswordDTO;
 import com.evi.teamfinderauth.repository.RoleRepository;
 import com.evi.teamfinderauth.repository.VerificationTokenRepository;
