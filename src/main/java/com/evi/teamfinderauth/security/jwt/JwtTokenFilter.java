@@ -50,7 +50,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
         User user = userRepository.findByUsername(jwtTokenUtil.getUsername(token))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
+        user.setToken(token);
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 user, null, user.getAuthorities());
 

@@ -12,6 +12,7 @@ import com.evi.teamfinderauth.domain.User;
 import com.evi.teamfinderauth.security.model.UserCredentials;
 import com.evi.teamfinderauth.repository.UserRepository;
 import com.evi.teamfinderauth.security.model.VerificationToken;
+import com.evi.teamfinderauth.service.feign.GroupManagementServiceFeignClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -40,12 +41,13 @@ public class AuthServiceImpl implements AuthService {
     private final VerificationTokenRepository verificationTokenRepository;
     private final JavaMailSender javaMailSender;
     private final ApplicationEventPublisher eventPublisher;
+    private final GroupManagementServiceFeignClient groupManagementServiceFeignClient;
 
 
     @Override
     public TokenResponse getToken(UserCredentials userCredentials) {
         User user = (User) userDetailsService.loadUserByUsername(userCredentials.getUsername());
-        if(!user.isEnabled()){
+        if (!user.isEnabled()) {
             throw new AccountNotEnabledException("Account not enabled");
         }
         if (!user.isAccountNonLocked()) {
@@ -63,7 +65,7 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
 
-        eventPublisher.publishEvent(new OnAccountRegisterCompleteEvent(user,request.getLocale(),request.getContextPath()));
+        eventPublisher.publishEvent(new OnAccountRegisterCompleteEvent(user, request.getLocale(), request.getContextPath()));
 
     }
 
@@ -73,7 +75,7 @@ public class AuthServiceImpl implements AuthService {
         validateVerificationToken(token);
 
         Long userId = verificationTokenRepository.findByToken(token).getUser().getId();
-        User user = userRepository.findById(userId).orElseThrow(()-> new UserNotFoundException("User not found id:"+userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found id:" + userId));
         user.setEnabled(true);
         userRepository.save(user);
         VerificationToken verificationToken = this.getVerificationToken(token);
@@ -94,7 +96,7 @@ public class AuthServiceImpl implements AuthService {
 
         VerificationToken verificationToken = this.getVerificationToken(token);
         Long userId = verificationTokenRepository.findByToken(token).getUser().getId();
-        User user = userRepository.findById(userId).orElseThrow(()-> new UserNotFoundException("User not found id:"+userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found id:" + userId));
         user.setEmail(verificationToken.getEmail());
         userRepository.save(user);
         verificationTokenRepository.delete(verificationToken);
@@ -107,8 +109,8 @@ public class AuthServiceImpl implements AuthService {
         Long id = currentUser.getId();
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found id:" + id));
         //TODO WALIDACJE ZROBIC Z UZYCIEM HIBERNATE
-      //  dataValidation.password(changePasswordDTO.getOldPassword());
-      //  dataValidation.password(changePasswordDTO.getNewPassword());
+        //  dataValidation.password(changePasswordDTO.getOldPassword());
+        //  dataValidation.password(changePasswordDTO.getNewPassword());
         if (passwordEncoder.matches(changePasswordDTO.getOldPassword(), user.getPassword())) {
             try {
                 user.setPassword(passwordEncoder.encode(changePasswordDTO.getNewPassword()));
@@ -133,19 +135,11 @@ public class AuthServiceImpl implements AuthService {
         long id = currentUser.getId();
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found id:" + id));
 
-        //TODO zrobic to na zasadzie wysyłania za pomocą openfeign zeby usunal uzytkownika z kazdej grupy + pobawic sie w transakcje
-        // to jest jak sie nie uda to poprostu blad zwrocic tutaj
-//        List<GroupRoom> UserGroupRooms = groupRepository.findAllByGroupLeaderId(id);
-//        try {
-//            for (GroupRoom groupRoom : UserGroupRooms) {
-//                userService.getOutOfGroup(groupRoom.getId());
-//            }
-            deleteVerificationToken(user);
-            userRepository.softDeleteById(id);
-//
-//        } catch (Exception e) {
-//            throw new DeleteUserException("Something wrong with deleting a user");
-//        }
+        //TODO pobawic sie w transakcje to jest jak sie nie uda to poprostu blad zwrocic tutaj
+
+        groupManagementServiceFeignClient.exitAllGroups(user.getId());
+        deleteVerificationToken(user);
+        userRepository.softDeleteById(id);
 
     }
 
@@ -163,12 +157,11 @@ public class AuthServiceImpl implements AuthService {
     public void createEmailChangeToken(User user, String token, String email) {
         if (verificationTokenRepository.existsByUserId(user.getId())) {
             throw new TokenAlreadySendException("Verification token already send");
-        }else if(verificationTokenRepository.existsByEmail(email)){
-            throw new EmailAlreadyTakenException("Email taken:"+email);
-        }else if(userRepository.existsByEmail(email)){
-            throw new EmailAlreadyTakenException("Email taken:"+email);
-        }
-        else {
+        } else if (verificationTokenRepository.existsByEmail(email)) {
+            throw new EmailAlreadyTakenException("Email taken:" + email);
+        } else if (userRepository.existsByEmail(email)) {
+            throw new EmailAlreadyTakenException("Email taken:" + email);
+        } else {
             VerificationToken myToken = VerificationToken.builder().token(token).email(email).user(user).build();
             verificationTokenRepository.save(myToken);
         }

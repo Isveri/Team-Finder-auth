@@ -35,6 +35,9 @@ public class User implements UserDetails, CredentialsContainer {
     @Email
     private String email;
 
+    @Transient
+    private String token;
+
     @ManyToOne(cascade=CascadeType.MERGE)
     @JoinColumn(name="role_id")
     private Role role;
