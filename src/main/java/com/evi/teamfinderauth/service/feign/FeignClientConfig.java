@@ -14,12 +14,12 @@ import static org.springframework.cloud.openfeign.security.OAuth2AccessTokenInte
 public class FeignClientConfig {
 
 
-        @Bean
-        public RequestInterceptor requestInterceptor() {
-            return requestTemplate -> {
-                requestTemplate.header("Accept", ContentType.APPLICATION_JSON.getMimeType());
-                requestTemplate.header(HttpHeaders.AUTHORIZATION, BEARER +" "+ getCurrentUser().getToken());
-            };
-        }
+    @Bean
+    public RequestInterceptor requestInterceptor() {
+        return requestTemplate -> {
+            requestTemplate.header("Accept", ContentType.APPLICATION_JSON.getMimeType());
+            requestTemplate.header(HttpHeaders.AUTHORIZATION, BEARER + " " + getCurrentUser().getToken());
+        };
+    }
 
 }

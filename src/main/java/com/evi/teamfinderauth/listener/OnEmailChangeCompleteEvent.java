@@ -16,7 +16,7 @@ public class OnEmailChangeCompleteEvent extends ApplicationEvent {
     private User user;
     private String email;
 
-    public OnEmailChangeCompleteEvent(User user,Locale locale,String email , String appUrl){
+    public OnEmailChangeCompleteEvent(User user, Locale locale, String email, String appUrl) {
         super(user);
         this.user = user;
         this.email = email;

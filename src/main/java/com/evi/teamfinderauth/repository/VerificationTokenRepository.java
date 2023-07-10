@@ -4,7 +4,7 @@ import com.evi.teamfinderauth.domain.User;
 import com.evi.teamfinderauth.security.model.VerificationToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface VerificationTokenRepository extends JpaRepository<VerificationToken,Long> {
+public interface VerificationTokenRepository extends JpaRepository<VerificationToken, Long> {
     VerificationToken findByToken(String token);
 
     VerificationToken findByUser(User user);
@@ -13,5 +13,4 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
 
     boolean existsByEmail(String email);
 
-    void deleteByUserId(Long userId);
 }

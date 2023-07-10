@@ -12,10 +12,11 @@ import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
 
 public interface AuthService {
-     void createNewAccount(User userDto, HttpServletRequest request);
-     TokenResponse getToken(UserCredentials userCredentials) throws UserNotFoundException;
+    void createNewAccount(User userDto, HttpServletRequest request);
 
-     TokenResponse confirmAccountRegister(String token);
+    TokenResponse getToken(UserCredentials userCredentials) throws UserNotFoundException;
+
+    TokenResponse confirmAccountRegister(String token);
 
     void confirmEmailChange(String token);
 

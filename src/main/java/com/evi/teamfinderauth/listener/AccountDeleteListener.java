@@ -17,13 +17,14 @@ public class AccountDeleteListener implements ApplicationListener<OnAccountDelet
     private final AuthService authService;
 
     private final JavaMailSender javaMailSender;
+
     @Override
     public void onApplicationEvent(OnAccountDeleteCompleteEvent event) {
         this.confirmAccountDelete(event);
 
     }
 
-    private void confirmAccountDelete(OnAccountDeleteCompleteEvent event){
+    private void confirmAccountDelete(OnAccountDeleteCompleteEvent event) {
         User user = event.getUser();
         String token = UUID.randomUUID().toString();
         authService.createVerificationToken(user, token);
@@ -48,7 +49,7 @@ public class AccountDeleteListener implements ApplicationListener<OnAccountDelet
                     "  color: #eee;\n" +
                     "  width:250px;" +
                     "  padding: 15px 25px;\n" +
-                    "  border: none;'>"+token+"</button></div></div></body>" +
+                    "  border: none;'>" + token + "</button></div></div></body>" +
                     "</html>", true);
             authService.sendMessage(mimeMessage);
         } catch (javax.mail.MessagingException e) {

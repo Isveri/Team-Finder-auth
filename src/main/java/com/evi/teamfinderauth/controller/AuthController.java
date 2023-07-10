@@ -23,57 +23,57 @@ import java.util.Objects;
 @RestController
 @RequestMapping("api/v1/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200")
 public class AuthController {
 
 
     private final AuthService authService;
     private final ApplicationEventPublisher eventPublisher;
+
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody UserCredentials userCredentials) throws UserNotFoundException {
         TokenResponse token = authService.getToken(userCredentials);
         if (Objects.nonNull(token)) {
             return ResponseEntity.ok(token);
         } else {
-            return new ResponseEntity<>("Login error", HttpStatus.BAD_REQUEST);
+            throw new UserNotFoundException("User with this username doesn't exist");
         }
     }
+
     @PostMapping("/register")
     public ResponseEntity<TokenResponse> createNewAccount(@Valid @RequestBody User user, HttpServletRequest request) {
-        authService.createNewAccount(user,request);
+        authService.createNewAccount(user, request);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping("/confirmAccountRegister")
+    @GetMapping("/confirm/register")
     public ResponseEntity<TokenResponse> confirmAccountRegister(@RequestParam("token") String token) {
         return ResponseEntity.ok(authService.confirmAccountRegister(token));
     }
 
-    @GetMapping("/confirmEmailChange")
-    public ResponseEntity<?> confirmEmailChange(@RequestParam("token") String token){
+    @GetMapping("/confirm/email")
+    public ResponseEntity<?> confirmEmailChange(@RequestParam("token") String token) {
         authService.confirmEmailChange(token);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PatchMapping("/emailChange")
-    public ResponseEntity<?> emailChange(@Valid @RequestBody EmailDTO email, HttpServletRequest request){
-        eventPublisher.publishEvent(new OnEmailChangeCompleteEvent(UserDetailsHelper.getCurrentUser(),request.getLocale(),email.getEmail(),request.getContextPath()));
+    @PatchMapping("/email")
+    public ResponseEntity<?> emailChange(@Valid @RequestBody EmailDTO email, HttpServletRequest request) {
+        eventPublisher.publishEvent(new OnEmailChangeCompleteEvent(UserDetailsHelper.getCurrentUser(), request.getLocale(), email.getEmail(), request.getContextPath()));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete-user")
-    public ResponseEntity<?> deleteAccount(HttpServletRequest request){
-        eventPublisher.publishEvent(new OnAccountDeleteCompleteEvent(UserDetailsHelper.getCurrentUser(),request.getLocale(),request.getContextPath()));
+    @DeleteMapping
+    public ResponseEntity<?> deleteAccount(HttpServletRequest request) {
+        eventPublisher.publishEvent(new OnAccountDeleteCompleteEvent(UserDetailsHelper.getCurrentUser(), request.getLocale(), request.getContextPath()));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping("/deleteAccountConfirm")
-    public ResponseEntity<?> confirmDeleteAccount(@RequestParam("token") String token){
+    @DeleteMapping("/confirm")
+    public ResponseEntity<?> confirmDeleteAccount(@RequestParam("token") String token) {
         authService.confirmDeleteAccount(token);
         return new ResponseEntity<>(HttpStatus.OK);
 
     }
-
 
     @PostMapping("/password-change")
     public ResponseEntity<?> changeUserPassword(@Valid @RequestBody ChangePasswordDTO changePasswordDTO) {

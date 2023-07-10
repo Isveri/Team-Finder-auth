@@ -16,8 +16,8 @@ public class PlatformController {
 
     private final PlatformService platformService;
 
-    @GetMapping("/connectDC")
-    public ResponseEntity<PlatformDTO> connectDC(@RequestParam("accessToken") String accessToken , @RequestParam("tokenType") String tokenType){
+    @GetMapping("/dc")
+    public ResponseEntity<PlatformDTO> connectDC(@RequestParam("accessToken") String accessToken, @RequestParam("tokenType") String tokenType) {
         return ResponseEntity.ok(platformService.connectDC(accessToken, tokenType));
     }
 }

@@ -52,10 +52,13 @@ public class AuthServiceImpl implements AuthService {
         }
         if (!user.isAccountNonLocked()) {
             throw new AccountBannedException("Account banned");
+        }
+        if (user.isDeleted()) {
+            throw new UserNotFoundException("Given credentials are invalid");
         } else if (passwordEncoder.matches(userCredentials.getPassword(), user.getPassword())) {
             return new TokenResponse(jwtTokenUtil.generateAccessToken(user));
         }
-        throw new BadCredentialsException("Given credentials are invalid");
+        throw new WrongPasswordException("Given credentials are invalid");
     }
 
     @Override
@@ -108,9 +111,7 @@ public class AuthServiceImpl implements AuthService {
         User currentUser = getCurrentUser();
         Long id = currentUser.getId();
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found id:" + id));
-        //TODO WALIDACJE ZROBIC Z UZYCIEM HIBERNATE
-        //  dataValidation.password(changePasswordDTO.getOldPassword());
-        //  dataValidation.password(changePasswordDTO.getNewPassword());
+
         if (passwordEncoder.matches(changePasswordDTO.getOldPassword(), user.getPassword())) {
             try {
                 user.setPassword(passwordEncoder.encode(changePasswordDTO.getNewPassword()));
@@ -135,9 +136,7 @@ public class AuthServiceImpl implements AuthService {
         long id = currentUser.getId();
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found id:" + id));
 
-        //TODO pobawic sie w transakcje to jest jak sie nie uda to poprostu blad zwrocic tutaj
-
-        groupManagementServiceFeignClient.exitAllGroups(user.getId());
+        groupManagementServiceFeignClient.exitAllGroups();
         deleteVerificationToken(user);
         userRepository.softDeleteById(id);
 

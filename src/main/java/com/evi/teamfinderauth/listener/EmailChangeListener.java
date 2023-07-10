@@ -17,16 +17,17 @@ import java.util.UUID;
 public class EmailChangeListener implements ApplicationListener<OnEmailChangeCompleteEvent> {
     private final AuthService authService;
     private final JavaMailSender javaMailSender;
+
     @Override
     public void onApplicationEvent(OnEmailChangeCompleteEvent event) {
         this.confirmEmailChange(event);
     }
 
-    private void confirmEmailChange(OnEmailChangeCompleteEvent event){
+    private void confirmEmailChange(OnEmailChangeCompleteEvent event) {
         User user = event.getUser();
         String token = UUID.randomUUID().toString();
         String newEmail = event.getEmail();
-        authService.createEmailChangeToken(user, token,newEmail);
+        authService.createEmailChangeToken(user, token, newEmail);
 
         String recipientAddress = user.getEmail();
         String subject = "Email Change Confirmation";

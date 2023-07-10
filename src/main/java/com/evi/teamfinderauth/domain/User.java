@@ -19,7 +19,7 @@ import java.util.List;
 @Getter
 @Entity
 @Builder
-@Table(name="users")
+@Table(name = "users")
 public class User implements UserDetails, CredentialsContainer {
 
     @Id
@@ -38,11 +38,11 @@ public class User implements UserDetails, CredentialsContainer {
     @Transient
     private String token;
 
-    @ManyToOne(cascade=CascadeType.MERGE)
-    @JoinColumn(name="role_id")
+    @ManyToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "role_id")
     private Role role;
 
-    @OneToMany(mappedBy = "user",cascade = CascadeType.MERGE)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE)
     private List<Platform> platforms;
 
     @Transient
@@ -53,10 +53,11 @@ public class User implements UserDetails, CredentialsContainer {
         authorities.add(new SimpleGrantedAuthority(role.getName()));
         return authorities;
     }
+
     @Builder.Default
     private boolean deleted = false;
 
-    public String roleToString(){
+    public String roleToString() {
         return this.role.getName();
     }
 

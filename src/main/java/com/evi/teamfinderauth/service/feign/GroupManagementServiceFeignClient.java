@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @FeignClient(name = "group-management-service")
 public interface GroupManagementServiceFeignClient {
 
-    @RequestMapping(method = RequestMethod.DELETE, value="/api/v1/userGroups/exitAllGroups/{userId}")
-    ResponseEntity<Long> exitAllGroups(@PathVariable Long userId);
+    @RequestMapping(method = RequestMethod.DELETE, value = "/api/v1/user-groups/all")
+    ResponseEntity<Long> exitAllGroups();
 
 }

@@ -7,7 +7,6 @@ import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
 @Mapper(builder = @Builder)
-@Component
 public abstract class PlatformMapper {
 
     public abstract PlatformDTO mapPlatformToPlatformDTO(Platform platform);

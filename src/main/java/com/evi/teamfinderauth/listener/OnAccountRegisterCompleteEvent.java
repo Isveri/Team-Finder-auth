@@ -15,7 +15,7 @@ public class OnAccountRegisterCompleteEvent extends ApplicationEvent {
     private Locale locale;
     private User user;
 
-    public OnAccountRegisterCompleteEvent(User user,Locale locale , String appUrl){
+    public OnAccountRegisterCompleteEvent(User user, Locale locale, String appUrl) {
         super(user);
         this.user = user;
         this.locale = locale;

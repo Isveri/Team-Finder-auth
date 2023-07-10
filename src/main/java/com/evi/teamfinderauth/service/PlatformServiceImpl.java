@@ -37,7 +37,6 @@ public class PlatformServiceImpl implements PlatformService {
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
             con.setRequestProperty("Authorization", tokenType + " " + accessToken);
-            int status = con.getResponseCode();
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(con.getInputStream()));
             String inputLine;
