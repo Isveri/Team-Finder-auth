@@ -12,6 +12,7 @@ import com.evi.teamfinderauth.domain.User;
 import com.evi.teamfinderauth.security.model.UserCredentials;
 import com.evi.teamfinderauth.repository.UserRepository;
 import com.evi.teamfinderauth.security.model.VerificationToken;
+import com.evi.teamfinderauth.service.feign.CoreServiceFeignClient;
 import com.evi.teamfinderauth.service.feign.GroupManagementServiceFeignClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -21,10 +22,10 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
-
 import java.util.Calendar;
 
 import static com.evi.teamfinderauth.utils.UserDetailsHelper.getCurrentUser;
@@ -42,6 +43,7 @@ public class AuthServiceImpl implements AuthService {
     private final JavaMailSender javaMailSender;
     private final ApplicationEventPublisher eventPublisher;
     private final GroupManagementServiceFeignClient groupManagementServiceFeignClient;
+    private final CoreServiceFeignClient coreServiceFeignClient;
 
 
     @Override
@@ -72,6 +74,7 @@ public class AuthServiceImpl implements AuthService {
 
     }
 
+    @Transactional
     @Override
     public TokenResponse confirmAccountRegister(String token) {
 
@@ -93,6 +96,7 @@ public class AuthServiceImpl implements AuthService {
         this.deleteUser();
     }
 
+    @Transactional
     @Override
     public void confirmEmailChange(String token) {
         validateVerificationToken(token);
@@ -133,10 +137,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void deleteUser() {
         User currentUser = getCurrentUser();
-        long id = currentUser.getId();
+        Long id = currentUser.getId();
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found id:" + id));
 
         groupManagementServiceFeignClient.exitAllGroups();
+        coreServiceFeignClient.removeAllFriends();
         deleteVerificationToken(user);
         userRepository.softDeleteById(id);
 
@@ -187,9 +192,7 @@ public class AuthServiceImpl implements AuthService {
 
     private void deleteVerificationToken(User user) {
         VerificationToken token = verificationTokenRepository.findByUser(user);
-        token.setUser(null);
         Long tempId = token.getId();
-        verificationTokenRepository.save(token);
         verificationTokenRepository.deleteById(tempId);
     }
 
