@@ -26,7 +26,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import static com.evi.teamfinderauth.utils.UserDetailsHelper.getCurrentUser;
 
@@ -89,6 +91,7 @@ public class AuthServiceImpl implements AuthService {
         return new TokenResponse(jwtTokenUtil.generateAccessToken(user));
     }
 
+    @Transactional
     @Override
     public void confirmDeleteAccount(String token) {
 
@@ -139,12 +142,40 @@ public class AuthServiceImpl implements AuthService {
         User currentUser = getCurrentUser();
         Long id = currentUser.getId();
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found id:" + id));
+        List<Long> removedIds = removeAllFriends();
+        String groupBackup = exitAllGroups(removedIds);
 
-        groupManagementServiceFeignClient.exitAllGroups();
-        coreServiceFeignClient.removeAllFriends();
-        deleteVerificationToken(user);
-        userRepository.softDeleteById(id);
+        try {
+            userRepository.softDeleteById(id);
+            deleteVerificationToken(user);
+        } catch (Exception e) {
+            coreServiceFeignClient.rollbackDelete(removedIds);
+            groupManagementServiceFeignClient.rollbackExit(groupBackup);
+            throw new RuntimeException("Error deleting user account");
+        }
 
+    }
+
+    private String exitAllGroups(List<Long> removedIds) {
+        String groupBackup = "";
+        try {
+            groupBackup = groupManagementServiceFeignClient.exitAllGroups();
+
+        } catch (Exception e) {
+            coreServiceFeignClient.rollbackDelete(removedIds);
+            throw new RuntimeException("Error deleting user account");
+        }
+        return groupBackup;
+    }
+
+    private List<Long> removeAllFriends() {
+        List<Long> removedIds;
+        try {
+            removedIds = coreServiceFeignClient.removeAllFriends();
+        } catch (Exception e) {
+            throw new RuntimeException("Error deleting user account");
+        }
+        return removedIds;
     }
 
     @Override
@@ -190,7 +221,7 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    private void deleteVerificationToken(User user) {
+    public void deleteVerificationToken(User user) {
         VerificationToken token = verificationTokenRepository.findByUser(user);
         Long tempId = token.getId();
         verificationTokenRepository.deleteById(tempId);
